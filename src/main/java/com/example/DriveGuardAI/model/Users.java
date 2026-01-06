@@ -89,7 +89,11 @@
 package com.example.DriveGuardAI.model;
 import java.util.List;
 
+import com.example.DriveGuardAI.Enum.UserRole;
+
+import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
+
 
 
 @Entity
@@ -114,10 +118,11 @@ public class Users {
     @Column(name = "Email", unique = true, nullable = false, length = 100)
     private String email;
 
+    @Enumerated(EnumType.STRING)
     @NotBlank(message = "User role is required")
     @Size(max = 20)
     @Column(name = "UserRole", nullable = false, length = 20)
-    private String userRole;
+    private UserRole userRole;
 
     @Size(max = 20)
     @Column(name = "PhoneNumber", length = 20)
@@ -179,12 +184,22 @@ public class Users {
         this.phoneNumber = phoneNumber;
     }
 
-
-    public String getUserRole() {
+    public UserRole getUserRole() {
         return userRole;
     }
-    public void setUserRole(String userRole) {
+
+    public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
     }
+
+    public List<Alters> getAlters() {
+        return alters;
+    }
+
+    public void setAlters(List<Alters> alters) {
+        this.alters = alters;
+    }
+
+
 
 }
