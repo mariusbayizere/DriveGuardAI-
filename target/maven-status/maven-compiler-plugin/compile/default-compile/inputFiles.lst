@@ -1,0 +1,9 @@
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/DriveGuardAiApplication.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/Enum/EventType.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/Enum/Severity.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/Enum/UserRole.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Alters.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Drivers.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Event.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/User.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Vehicles.java

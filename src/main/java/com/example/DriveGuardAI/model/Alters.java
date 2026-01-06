@@ -1,59 +1,21 @@
 package com.example.DriveGuardAI.model;
+import com.example.DriveGuardAI.enums.Alerts_Status;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Alterts")
 public class Alters {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String alterType;
-    private String alterDescription;
-    private String alterDate;
-    private String driverId;
-    private String vehicleId;
+    private String message;
+    private String sentAt;
+    private Alerts_Status status;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAlterType() {
-        return alterType;
-    }
-
-    public void setAlterType(String alterType) {
-        this.alterType = alterType;
-    }
-
-    public String getAlterDescription() {
-        return alterDescription;
-    }
-
-    public void setAlterDescription(String alterDescription) {
-        this.alterDescription = alterDescription;
-    }
-
-    public String getAlterDate() {
-        return alterDate;
-    }
-
-    public void setAlterDate(String alterDate) {
-        this.alterDate = alterDate;
-    }
-
-    public String getDriverId() {
-        return driverId;
-    }
-
-    public void setDriverId(String driverId) {
-        this.driverId = driverId;
-    }
-
-    public String getVehicleId() {
-        return vehicleId;
-    }
-
-    public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 }
