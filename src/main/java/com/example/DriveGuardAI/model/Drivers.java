@@ -1,5 +1,5 @@
 package com.example.DriveGuardAI.model;
-import com.example.DriveGuardAI.enums.Drivers_Status;
+import com.example.DriveGuardAI.Enum.DriverStatus;
 
 import java.util.Date;
 
@@ -8,5 +8,5 @@ public class Drivers {
     private String licenseNumber;
     private Date hireDate;
     private Byte safetyScore;
-    private Drivers_Status status;
+    private DriverStatus status;
 }

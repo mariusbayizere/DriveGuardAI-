@@ -1,6 +1,6 @@
 package com.example.DriveGuardAI.model;
 
-import com.example.DriveGuardAI.enums.IncidentTypes;
+import com.example.DriveGuardAI.Enum.*;
 
 public class Incidents {
     private Long incident_id;
