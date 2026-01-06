@@ -28,6 +28,10 @@ public class Alters {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "incident_id", nullable = false)
+    private Incidents incident;
+
 
     public Long getId() {
         return id;

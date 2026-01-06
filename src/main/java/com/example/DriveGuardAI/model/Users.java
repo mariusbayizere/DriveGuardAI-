@@ -1,4 +1,5 @@
 package com.example.DriveGuardAI.model;
+import java.sql.Driver;
 import java.util.List;
 
 import com.example.DriveGuardAI.Enum.UserRole;
@@ -47,6 +48,10 @@ public class Users {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Alters> alters;
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Driver driver;
 
 
     // Getters and Setters

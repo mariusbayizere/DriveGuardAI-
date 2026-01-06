@@ -1,4 +1,4 @@
-package com.example.DriveGuardAI.enums;
+package com.example.DriveGuardAI.Enum;
 
 public enum Trips_Status {
     ONGOING,

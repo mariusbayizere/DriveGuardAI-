@@ -1,11 +1,32 @@
 package com.example.DriveGuardAI.model;
 
-import com.example.DriveGuardAI.enums.Trips_Status;
+import java.util.List;
 
+import com.example.DriveGuardAI.Enum.Trips_Status;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Trips")
 public class Trips {
-    private Long trip_id;
-    private String start_time;
-    private String end_time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long tripId;
+    private String startTime;
+    private String endTime;
     private Trips_Status status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id", nullable = false)
+    private Drivers driver;
+
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Incidents> incidents;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicles vehicle;
+
 }
