@@ -33,4 +33,78 @@ public class Incidents {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicles vehicles;
+
+    public Long getIncident_id() {
+        return incident_id;
+    }
+
+    public void setIncident_id(Long incident_id) {
+        this.incident_id = incident_id;
+    }
+
+    public IncidentTypes getIncident_type() {
+        return incident_type;
+    }
+
+    public void setIncident_type(IncidentTypes incident_type) {
+        this.incident_type = incident_type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Drivers getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Drivers driver) {
+        this.driver = driver;
+    }
+
+    public Trips getTrip() {
+        return trip;
+    }
+
+    public void setTrip(Trips trip) {
+        this.trip = trip;
+    }
+
+    public List<Alters> getAlters() {
+        return alters;
+    }
+
+    public void setAlters(List<Alters> alters) {
+        this.alters = alters;
+    }
+
+    public Vehicles getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Vehicles vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    
 }

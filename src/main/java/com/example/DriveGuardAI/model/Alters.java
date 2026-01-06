@@ -81,11 +81,6 @@ public class Alters {
     public void setUser(Users user) {
         this.user = user;
     }
-
-
-  
-
-    
 }
 
 
