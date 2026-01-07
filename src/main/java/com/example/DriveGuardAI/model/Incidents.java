@@ -98,13 +98,21 @@ public class Incidents {
         this.alters = alters;
     }
 
-    public Vehicles getVehicles() {
-        return vehicles;
-    }
+    // public Vehicles getVehicles() {
+    //     return vehicles;
+    // }
 
-    public void setVehicles(Vehicles vehicles) {
-        this.vehicles = vehicles;
-    }
+    // public void setVehicles(Vehicles vehicles) {
+    //     this.vehicles = vehicles;
+    // }
 
+
+         public Vehicles getVehicle() {
+         return vehicles;
+     }
+
+     public void setVehicle(Vehicles vehicle) {
+         this.vehicles = vehicle;
+     }
     
 }

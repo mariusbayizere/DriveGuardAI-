@@ -6,6 +6,6 @@ import com.example.DriveGuardAI.model.Users;
 
 public interface UserRepository  extends JpaRepository<Users, Long> {
     Users findByEmail(String email);
-    Users findByName(String name);
-    
+    Users findByFirstName(String firstName);
+
 }

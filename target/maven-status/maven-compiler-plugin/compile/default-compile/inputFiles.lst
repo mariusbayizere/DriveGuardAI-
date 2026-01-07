@@ -12,3 +12,9 @@
 /home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Trips.java
 /home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Users.java
 /home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/model/Vehicles.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/AltersRepository.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/DriverRepository.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/IncidentRepository.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/TripRepository.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/UserRepository.java
+/home/marius/DriveGuardAI-/src/main/java/com/example/DriveGuardAI/repository/VehiclesRepository.java

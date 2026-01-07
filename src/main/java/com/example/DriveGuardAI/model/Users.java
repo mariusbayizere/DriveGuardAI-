@@ -51,7 +51,7 @@ public class Users {
 
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Driver driver;
+    private Drivers driver;
 
 
     // Getters and Setters
