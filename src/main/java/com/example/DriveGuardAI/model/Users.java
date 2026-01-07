@@ -116,4 +116,14 @@ public class Users {
     public void setAlters(List<Alters> alters) {
         this.alters = alters;
     }
+
+    public Drivers getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Drivers driver) {
+        this.driver = driver;
+    }
+
+    
 }

@@ -81,6 +81,17 @@ public class Alters {
     public void setUser(Users user) {
         this.user = user;
     }
+
+
+    public Incidents getIncident() {
+        return incident;
+    }
+
+
+    public void setIncident(Incidents incident) {
+        this.incident = incident;
+    }
+
 }
 
 
