@@ -3,6 +3,7 @@ import java.sql.Driver;
 import java.util.List;
 
 import com.example.DriveGuardAI.Enum.UserRole;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
@@ -32,9 +33,7 @@ public class Users {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "User role is required")
-    @Size(max = 20)
-    @Column(name = "UserRole", nullable = false, length = 20)
+    @Column(name = "UserRole", nullable = false)
     private UserRole userRole;
 
     @Size(max = 20)
@@ -43,6 +42,7 @@ public class Users {
 
     @NotBlank(message = "Password is required")
     @Size(min = 8)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "Password", nullable = false)
     private String password;
 
