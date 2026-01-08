@@ -5,6 +5,8 @@ import java.util.List;
 import com.example.DriveGuardAI.Enum.*;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "Incidents")
@@ -28,6 +30,7 @@ public class Incidents {
     private Trips trip;
 
     @OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore 
     private List<Alters> alters;
 
     @ManyToOne(fetch = FetchType.LAZY)

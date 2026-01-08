@@ -3,8 +3,10 @@ package com.example.DriveGuardAI.model;
 import java.util.List;
 
 import com.example.DriveGuardAI.Enum.Trips_Status;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
+
 
 @Entity
 @Table(name = "Trips")
@@ -22,6 +24,7 @@ public class Trips {
 
 
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Incidents> incidents;
 
 
