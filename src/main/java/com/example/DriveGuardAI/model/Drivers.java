@@ -1,10 +1,22 @@
 package com.example.DriveGuardAI.model;
-import com.example.DriveGuardAI.Enum.DriverStatus;
-
-import jakarta.persistence.*;
-
 import java.util.Date;
 import java.util.List;
+
+import com.example.DriveGuardAI.Enum.DriverStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Drivers")
@@ -26,17 +38,21 @@ public class Drivers {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Users user;
 
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Vehicles> vehicles;
+    @JsonIgnore 
+    private List<Vehicles> vehicles = new java.util.ArrayList<>();
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Trips> trips;
+    @JsonIgnore
+    private List<Trips> trips = new java.util.ArrayList<>();
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Incidents> incidents;
+    @JsonIgnore
+    private List<Incidents> incidents = new java.util.ArrayList<>();
 
     public Long getId() {
         return id;
