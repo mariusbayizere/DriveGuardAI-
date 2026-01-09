@@ -1,6 +1,9 @@
 package com.example.DriveGuardAI.model;
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.example.DriveGuardAI.Enum.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -51,6 +54,22 @@ public class Users {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Drivers driver;
+
+
+
+    @Transient
+    private String confirmPassword;
+
+    @Transient
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @AssertTrue(message = "Password and Confirm Password must match")
+    public boolean isPasswordConfirmed() {
+        if (confirmPassword == null || password == null) {
+            return false;
+        }
+        return passwordEncoder.matches(confirmPassword, password);
+    }
 
 
     // Getters and Setters
@@ -122,6 +141,14 @@ public class Users {
 
     public void setDriver(Drivers driver) {
         this.driver = driver;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 
     
