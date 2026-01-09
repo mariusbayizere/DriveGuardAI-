@@ -29,7 +29,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/orders/**").hasAnyRole("SHOPPER","ADMIN") // Restrict order placement
+                        .requestMatchers("/api/orders/**").hasAnyRole("MANAGER","ADMIN") // Restrict order placement
                         .requestMatchers("/api/orders/history").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/categories/**").hasRole("ADMIN") 
