@@ -1,0 +1,24 @@
+# ─── Database ────────────────────────────────────────────────────────────
+spring.datasource.url=jdbc:postgresql://localhost:5432/your_db_name
+spring.datasource.username=your_db_username
+spring.datasource.password=your_db_password
+server.port=8080
+
+# ─── Email ───────────────────────────────────────────────────────────────
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_gmail_app_password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+app.manager.email=your_email@gmail.com
+
+# ─── Google OAuth2 ───────────────────────────────────────────────────────
+spring.security.oauth2.client.registration.google.client-id=your_google_client_id
+spring.security.oauth2.client.registration.google.client-secret=your_google_client_secret
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.scope=email,profile,openid
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth?prompt=select_account
