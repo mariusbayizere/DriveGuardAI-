@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+react-scripts/
+
+# Production build
+build/
+dist/
+
+# Environment variables (keep secrets out of git)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# Backup files (your project-specific ones)
+*.backup
+*.Backup1
+*_Before-Responsiveness
+*.js.W
+
+# Testing
+coverage/
+
+# Misc
+.cache/

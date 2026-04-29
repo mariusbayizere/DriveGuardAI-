@@ -1,0 +1,43 @@
+import React from 'react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { Card, CardHeader, Chip, ChartTooltip } from '../ui';
+
+const PIE_FALLBACK = ['#ef4444','#f97316','#eab308','#22c55e'];
+
+const SeverityDonutChart = ({ data, isMobile, delay = 0 }) => {
+  const total = data.reduce((s, e) => s + e.value, 0);
+  return (
+    <Card delay={delay}>
+      <CardHeader title="Severity Distribution" subtitle="Incident risk level analysis"
+        right={<Chip label="Donut Chart" color="#3b82f6" bg="#eff6ff" border="#bfdbfe"/>}/>
+      <div style={{ padding:isMobile?'12px 16px 16px':'16px 24px 20px', display:'flex', flexDirection:isMobile?'column':'row', alignItems:'center', gap:isMobile?12:16 }}>
+        <ResponsiveContainer width={isMobile?'100%':'52%'} height={isMobile?160:210}>
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={isMobile?40:55} outerRadius={isMobile?68:88} paddingAngle={2} dataKey="value" label={false}>
+              {data.map((entry, i) => (
+                <Cell key={i} fill={entry.color||PIE_FALLBACK[i%PIE_FALLBACK.length]} stroke="#fff" strokeWidth={2}/>
+              ))}
+            </Pie>
+            <Tooltip content={<ChartTooltip/>}/>
+          </PieChart>
+        </ResponsiveContainer>
+        <div style={{ flex:1, display:'flex', flexDirection:isMobile?'row':'column', flexWrap:isMobile?'wrap':'nowrap', gap:isMobile?8:11, width:isMobile?'100%':'auto' }}>
+          {data.map((entry, i) => {
+            const color = entry.color||PIE_FALLBACK[i%PIE_FALLBACK.length];
+            const pct   = total ? Math.round((entry.value/total)*100) : 0;
+            return (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:9, flex:isMobile?'1 1 40%':'unset' }}>
+                <div style={{ width:10, height:10, borderRadius:3, background:color, flexShrink:0 }}/>
+                <span style={{ fontSize:12, color:'#6b7280', flex:1, fontWeight:500 }}>{entry.name}</span>
+                <span style={{ fontSize:13, fontWeight:800, color:'#111827', minWidth:20, textAlign:'right' }}>{entry.value}</span>
+                <span style={{ fontSize:11, color:'#9ca3af', background:'#f9fafb', border:'1px solid #f3f4f6', borderRadius:4, padding:'2px 7px', fontWeight:600, minWidth:36, textAlign:'center' }}>{pct}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+export default SeverityDonutChart;
