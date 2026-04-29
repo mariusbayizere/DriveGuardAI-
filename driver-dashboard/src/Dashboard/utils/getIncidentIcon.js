@@ -1,4 +1,4 @@
-import { IcoDistraction, IcoSpeeding, IcoSeatbelt, IcoPhone, IcoFatigue, IcoGeneric } from '../components/icons';
+import { IcoDistraction, IcoSpeeding, IcoSeatbelt, IcoPhone, IcoFatigue, IcoGeneric } from '../DashboardComponents/icons';
 
 export const getIncidentIcon = (type = '') => {
   const t = type.toUpperCase();

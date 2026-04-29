@@ -5,7 +5,7 @@ import {
   IcoPhone,
   IcoFatigue,
   IcoGeneric,
-} from '../components/icons';
+} from '../DashboardComponents/icons';
 
 /**
  * Maps an incident type string to its corresponding icon component.
