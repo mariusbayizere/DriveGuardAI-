@@ -130,12 +130,12 @@ export default function DriveGuardAuth({ onAuthSuccess }) {
           {auth.isLogin ? (
             <>
               <PanelHeader title="Sign In" subtitle="Access your DriveGuard AI account" />
-              <SignInForm {...signInProps} idPrefix="si-mobile" />
+              <SignInForm {...signInProps} />
             </>
           ) : (
             <>
               <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" />
-              <SignUpForm {...signUpProps} idPrefix="su-mobile" />
+              <SignUpForm {...signUpProps} />
             </>
           )}
         </div>
@@ -151,7 +151,7 @@ export default function DriveGuardAuth({ onAuthSuccess }) {
         {/* Sign In — left panel */}
         <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 32px" }}>
           <PanelHeader title="Welcome Back" subtitle="Sign in to your DriveGuard AI account" />
-          <SignInForm {...signInProps} idPrefix="si-tablet" />
+          <SignInForm {...signInProps} />
         </div>
 
         {/* Green sliding overlay */}
@@ -168,7 +168,7 @@ export default function DriveGuardAuth({ onAuthSuccess }) {
         {/* Sign Up — right panel */}
         <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 32px" }}>
           <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" />
-          <SignUpForm {...signUpProps} idPrefix="su-tablet" />
+          <SignUpForm {...signUpProps} />
         </div>
       </div>
 
@@ -182,7 +182,7 @@ export default function DriveGuardAuth({ onAuthSuccess }) {
         {/* Sign In — left panel */}
         <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 48px" }}>
           <PanelHeader title="Welcome Back" subtitle="Sign in to your DriveGuard AI account" large />
-          <SignInForm {...signInProps} idPrefix="si-desktop" />
+          <SignInForm {...signInProps} />
         </div>
 
         {/* Green sliding overlay */}
@@ -199,7 +199,7 @@ export default function DriveGuardAuth({ onAuthSuccess }) {
         {/* Sign Up — right panel */}
         <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 48px" }}>
           <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" large />
-          <SignUpForm {...signUpProps} idPrefix="su-desktop" />
+          <SignUpForm {...signUpProps} />
         </div>
       </div>
     </div>
