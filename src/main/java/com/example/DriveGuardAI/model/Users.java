@@ -1,16 +1,13 @@
 package com.example.DriveGuardAI.model;
 import java.util.List;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.example.DriveGuardAI.Enum.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-
 
 @Entity
 @Table(name = "users")
@@ -42,12 +39,11 @@ public class Users {
     @Column(name = "PhoneNumber", length = 20)
     private String phoneNumber;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "Password", nullable = false)
     private String password;
-
+    
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Alters> alters;
 
@@ -55,22 +51,11 @@ public class Users {
     @JsonIgnore
     private Drivers driver;
 
-
-
     @Transient
     private String confirmPassword;
 
     @Transient
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    @AssertTrue(message = "Password and Confirm Password must match")
-    public boolean isPasswordConfirmed() {
-        if (confirmPassword == null || password == null) {
-            return false;
-        }
-        return passwordEncoder.matches(confirmPassword, password);
-    }
-
 
     // Getters and Setters
     public Long getId() {
@@ -80,6 +65,7 @@ public class Users {
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getFirstName() {
         return firstName;
     }
@@ -107,6 +93,7 @@ public class Users {
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -150,6 +137,4 @@ public class Users {
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
-
-    
 }

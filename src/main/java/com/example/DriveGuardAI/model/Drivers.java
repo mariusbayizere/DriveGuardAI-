@@ -1,3 +1,4 @@
+
 package com.example.DriveGuardAI.model;
 import java.util.Date;
 import java.util.List;

@@ -1,3 +1,5 @@
+
+/*
 package com.example.DriveGuardAI.service;
 
 import java.util.List;
@@ -105,6 +107,146 @@ public class DriversService {
 
             existing.setUser(newUser);
             // keep back-reference in sync
+            newUser.setDriver(existing);
+        }
+
+        return driverRepository.save(existing);
+    }
+
+    public void delete(Long id) {
+        Drivers existing = driverRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+
+        Users user = existing.getUser();
+        if (user != null) {
+            user.setDriver(null);
+        }
+
+        driverRepository.deleteById(id);
+    }
+}
+
+*/
+
+package com.example.DriveGuardAI.service;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.example.DriveGuardAI.Enum.DriverStatus;
+import com.example.DriveGuardAI.model.Drivers;
+import com.example.DriveGuardAI.model.Users;
+import com.example.DriveGuardAI.repository.DriverRepository;
+import com.example.DriveGuardAI.repository.UserRepository;
+
+@Service
+@Transactional
+public class DriversService {
+
+    private static final byte DEFAULT_SAFETY_SCORE = 100;
+
+    private final DriverRepository driverRepository;
+    private final UserRepository   userRepository;
+
+    public DriversService(DriverRepository driverRepository, UserRepository userRepository) {
+        this.driverRepository = driverRepository;
+        this.userRepository   = userRepository;
+    }
+
+    public List<Drivers> findAll() {
+        return driverRepository.findAll();
+    }
+
+    // ── Find by the driver's own primary key ─────────────────────────────────
+    public Drivers findById(Long id) {
+        return driverRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+    }
+
+    // ── NEW: Find by the linked user's ID ────────────────────────────────────
+    // Called by GET /api/v1/drivers/user/{userId}.
+    // The React DriverPortal resolves the logged-in user's ID via /api/v1/auth/me,
+    // then calls this endpoint to load the driver profile, incidents, and trips.
+    public Drivers findByUserId(Long userId) {
+        Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "User not found with id: " + userId));
+
+        Drivers driver = user.getDriver();
+        if (driver == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "No driver profile linked to user id: " + userId);
+        }
+        return driver;
+    }
+
+    public Drivers create(Drivers driver) {
+        if (driver.getLicenseNumber() == null || driver.getLicenseNumber().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "LicenseNumber is required");
+        }
+        if (driverRepository.findByLicenseNumber(driver.getLicenseNumber()) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "LicenseNumber already exists");
+        }
+        if (driver.getHireDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "HireDate is required");
+        }
+        if (driver.getStatus() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Driver status is required");
+        }
+        if (driver.getUser() == null || driver.getUser().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User id is required");
+        }
+
+        Users user = userRepository.findById(driver.getUser().getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        if (user.getDriver() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already assigned to a driver");
+        }
+
+        driver.setId(null);
+        driver.setUser(user);
+        driver.setSafetyScore(DEFAULT_SAFETY_SCORE);
+
+        user.setDriver(driver);
+        return driverRepository.save(driver);
+    }
+
+    public Drivers update(Long id, Drivers payload) {
+        Drivers existing = driverRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+
+        if (payload.getLicenseNumber() != null) {
+            if (!payload.getLicenseNumber().equals(existing.getLicenseNumber())) {
+                Drivers other = driverRepository.findByLicenseNumber(payload.getLicenseNumber());
+                if (other != null && !other.getId().equals(existing.getId())) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "LicenseNumber already in use");
+                }
+            }
+            existing.setLicenseNumber(payload.getLicenseNumber());
+        }
+        if (payload.getHireDate()    != null) existing.setHireDate(payload.getHireDate());
+        if (payload.getSafetyScore() != null) existing.setSafetyScore(payload.getSafetyScore());
+        if (payload.getStatus()      != null) existing.setStatus(payload.getStatus());
+
+        if (payload.getUser() != null && payload.getUser().getId() != null) {
+            Users newUser = userRepository.findById(payload.getUser().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+            if (newUser.getDriver() != null && !newUser.getDriver().getId().equals(existing.getId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already assigned to a different driver");
+            }
+
+            Users oldUser = existing.getUser();
+            if (oldUser != null && !oldUser.getId().equals(newUser.getId())) {
+                oldUser.setDriver(null);
+            }
+
+            existing.setUser(newUser);
             newUser.setDriver(existing);
         }
 

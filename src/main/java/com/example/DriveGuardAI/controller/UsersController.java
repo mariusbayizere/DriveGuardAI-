@@ -1,21 +1,16 @@
 package com.example.DriveGuardAI.controller;
-
 import java.net.URI;
 import java.util.List;
-
 import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.example.DriveGuardAI.model.Users;
 import com.example.DriveGuardAI.service.UsersService;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UsersController {
-
     private final UsersService usersService;
 
     public UsersController(UsersService usersService) {
@@ -44,7 +39,7 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Users> update(@PathVariable Long id, @Valid @RequestBody Users user) {
+    public ResponseEntity<Users> update(@PathVariable Long id, @RequestBody Users user) {
         Users updated = usersService.update(id, user);
         return ResponseEntity.ok(updated);
     }
@@ -55,3 +50,5 @@ public class UsersController {
         return ResponseEntity.noContent().build();
     }
 }
+
+

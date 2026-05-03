@@ -13,11 +13,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,13 +24,22 @@ import com.example.DriveGuardAI.repository.UserRepository;
 import com.example.DriveGuardAI.SecurityConfig.JwtProvider;
 import com.example.DriveGuardAI.response.AuthResponse;
 import com.example.DriveGuardAI.service.EmailService;
-import com.example.DriveGuardAI.service.UsersService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "User Authentication", description = "APIs for user authentication and registration")
 public class UserAutho {
 
     @Autowired
@@ -45,37 +51,23 @@ public class UserAutho {
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private UsersService usersService;
-
-    // ── DTO for the update-password request body ──────────────────────────────
-    public static class UpdatePasswordRequest {
-        private String email;
-        private String newPassword;
-        private String confirmPassword;
-
-        public String getEmail()                     { return email; }
-        public void   setEmail(String e)             { this.email = e; }
-
-        public String getNewPassword()               { return newPassword; }
-        public void   setNewPassword(String p)       { this.newPassword = p; }
-
-        public String getConfirmPassword()           { return confirmPassword; }
-        public void   setConfirmPassword(String cp)  { this.confirmPassword = cp; }
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-
+    @Operation(summary = "Register a new user", description = "Allows a new user to register in the system")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Email already exists or passwords do not match")
+    })
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> createUserHandler(@RequestBody Users user) {
         String email = user.getEmail();
 
+        // Check if email already exists
         Optional<Users> isEmailExist = userRepository.findByEmail(email);
         if (isEmailExist.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new AuthResponse(false, "Email is already used", null));
         }
 
+        // Validate that password and confirmPassword match (plain text comparison before encoding)
         if (user.getPassword() == null || user.getConfirmPassword() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new AuthResponse(false, "Password and Confirm Password are required", null));
@@ -86,17 +78,23 @@ public class UserAutho {
                     .body(new AuthResponse(false, "Passwords do not match", null));
         }
 
+        // Save raw password before encoding (needed for authentication token)
         String rawPassword = user.getPassword();
+
+        // Encode and set the password
         String encodedPassword = passwordEncoder.encode(rawPassword);
         user.setPassword(encodedPassword);
-        user.setConfirmPassword(null);
+        user.setConfirmPassword(null); // Clear confirm password — not stored in DB
 
+        // Save user to database
         userRepository.save(user);
 
+        // Build authentication using raw password
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, rawPassword);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = JwtProvider.generateToken(authentication);
 
+        // Send registration confirmation email
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setRecipient(email);
         emailDetails.setSubject("Registration Successful");
@@ -106,11 +104,17 @@ public class UserAutho {
         return ResponseEntity.ok(new AuthResponse(true, "Register Success", token));
     }
 
+    @Operation(summary = "User Sign-in", description = "Authenticates a user and returns a JWT token")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Signin successful"),
+        @ApiResponse(responseCode = "400", description = "Invalid username or password")
+    })
     @PostMapping("/signin")
     public ResponseEntity<AuthResponse> signin(@RequestBody Users loginRequest) {
         String username = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
+        // Validate input
         if (username == null || password == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new AuthResponse(false, "Email and password are required", null));
@@ -128,64 +132,9 @@ public class UserAutho {
     }
 
     /**
-     * PUT /api/v1/auth/update-password
-     *
-     * Request body:
-     * {
-     *   "email":           "user@example.com",
-     *   "newPassword":     "MyNewPass123",
-     *   "confirmPassword": "MyNewPass123"
-     * }
-     *
-     * Responses:
-     *   200 — password updated successfully
-     *   400 — validation error (missing fields, too short, or mismatch)
-     *   404 — no account found for the given email
+     * Authenticates a user by verifying their email exists in the database
+     * and that the provided raw password matches the stored BCrypt hash.
      */
-    @PutMapping("/update-password")
-    public ResponseEntity<AuthResponse> updatePassword(@RequestBody UpdatePasswordRequest request) {
-
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new AuthResponse(false, "Email is required", null));
-        }
-
-        if (request.getNewPassword() == null || request.getNewPassword().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new AuthResponse(false, "New password is required", null));
-        }
-
-        if (request.getConfirmPassword() == null || request.getConfirmPassword().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new AuthResponse(false, "Confirm password is required", null));
-        }
-
-        try {
-            usersService.updatePassword(
-                request.getEmail(),
-                request.getNewPassword(),
-                request.getConfirmPassword()
-            );
-
-            EmailDetails emailDetails = new EmailDetails();
-            emailDetails.setRecipient(request.getEmail());
-            emailDetails.setSubject("Password Updated");
-            emailDetails.setMsgBody(
-                "Hello,\n\nYour DriveGuard AI password has been updated successfully.\n" +
-                "If you did not make this change, please contact support immediately."
-            );
-            emailService.sendSimpleMail(emailDetails);
-
-            return ResponseEntity.ok(new AuthResponse(true, "Password updated successfully", null));
-
-        } catch (org.springframework.web.server.ResponseStatusException ex) {
-            return ResponseEntity.status(ex.getStatusCode())
-                    .body(new AuthResponse(false, ex.getReason(), null));
-        }
-    }
-
-    // ── helpers ───────────────────────────────────────────────────────────────
-
     private Authentication authenticate(String username, String password) {
         Optional<Users> optionalUser = userRepository.findByEmail(username);
 
@@ -195,20 +144,46 @@ public class UserAutho {
 
         Users foundUser = optionalUser.get();
 
+        // ✅ Verify raw password against the stored BCrypt hash
         if (!passwordEncoder.matches(password, foundUser.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        List<GrantedAuthority> authorities =
-            AuthorityUtils.createAuthorityList(foundUser.getUserRole().name());
+        List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(foundUser.getUserRole().name());
         return new UsernamePasswordAuthenticationToken(username, password, authorities);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 
+
+
+
+//-----------------
+
+     /**
+     * GET /api/v1/auth/me
+     *
+     * Decodes the JWT from the Authorization header and returns the
+     * current user's profile including their real database ID.
+     *
+     * This solves the React frontend issue where API calls were being
+     * made to /api/drivers/user/undefined because the user ID was not
+     * yet resolved. The frontend should call /me first after login,
+     * then use the returned ID for all subsequent requests.
+     *
+     * Header required: Authorization: Bearer <token>
+     */
+    @Operation(summary = "Get current logged-in user", description = "Returns user profile decoded from JWT token")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User profile returned"),
+        @ApiResponse(responseCode = "401", description = "Invalid or expired token"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
+            // ✅ FIXED: was getEmailFromToken() — correct name is getEmailFromJwtToken()
+            // getEmailFromJwtToken() expects the full "Bearer xxx" string
+            // and strips the prefix internally with substring(7)
             String email = JwtProvider.getEmailFromJwtToken(authHeader);
 
             Optional<Users> optionalUser = userRepository.findByEmail(email);
@@ -219,6 +194,7 @@ public class UserAutho {
 
             Users foundUser = optionalUser.get();
 
+            // Return safe user fields including the real DB id
             Map<String, Object> userMap = new HashMap<>();
             userMap.put("id",          foundUser.getId());
             userMap.put("email",       foundUser.getEmail());
@@ -234,4 +210,5 @@ public class UserAutho {
                     .body(new AuthResponse(false, "Invalid or expired token", null));
         }
     }
-}
+
+  }
