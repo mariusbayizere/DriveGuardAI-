@@ -1,0 +1,14 @@
+src/main/resources/application-local.properties.backup
+src/main/resources/application-local.properties
+src/main/resources/application.properties.backup
+k8s/secrets/secrets.yaml
+*.backup
+.env
+.env.*
+src/main/resources/application-local.properties.backup
+src/main/resources/application-local.properties
+src/main/resources/application.properties.backup
+k8s/secrets/secrets.yaml
+*.backup
+.env
+.env.*
