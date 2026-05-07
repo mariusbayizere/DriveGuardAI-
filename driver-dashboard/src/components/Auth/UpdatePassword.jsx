@@ -67,7 +67,7 @@ export default function UpdatePassword({ onBackToLogin }) {
     setMessage(null);
 
     try {
-      const res = await fetch("http://localhost:8080/api/v1/auth/update-password", {
+      const res = await fetch((process.env.REACT_APP_API_BASE || "https://driveguard.local/api/v1") + "/auth/update-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -466,7 +466,7 @@ export default function UpdatePassword({ onBackToLogin }) {
                   className="up-input"
                   name="email"
                   type="email"
-                  placeholder="driver@company.com"
+                  placeholder="Enter your email address "
                   value={form.email}
                   onChange={handle}
                   autoComplete="email"
@@ -481,7 +481,7 @@ export default function UpdatePassword({ onBackToLogin }) {
                     className="up-input"
                     name="newPassword"
                     type={showNew ? "text" : "password"}
-                    placeholder="Min. 8 characters"
+                    placeholder="Enter Min. 8 characters"
                     value={form.newPassword}
                     onChange={handle}
                     style={{ paddingRight: 44 }}

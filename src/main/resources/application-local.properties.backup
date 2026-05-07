@@ -1,0 +1,24 @@
+# ─── Database ────────────────────────────────────────────────────────────
+spring.datasource.url=jdbc:postgresql://localhost:5432/driveguard_ai
+spring.datasource.username=postgres
+spring.datasource.password=auca@2023
+server.port=8080
+
+# ─── Email ───────────────────────────────────────────────────────────────
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=bayizeremarius93@gmail.com
+spring.mail.password=fmcg tngt ttsg nxlm
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+app.manager.email=bayizeremarius93@gmail.com
+
+# ─── Google OAuth2 ───────────────────────────────────────────────────────
+spring.security.oauth2.client.registration.google.client-id=945094648406-f0oo3vt221avl31bco32oh9td2kf5ink.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=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
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.scope=email,profile,openid
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth?prompt=select_account

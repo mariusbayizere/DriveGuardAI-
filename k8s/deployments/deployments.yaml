@@ -1,0 +1,137 @@
+# ─── React Deployment ─────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveguard-react
+  namespace: prod
+  labels:
+    app: driveguard-react
+    project: driveguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driveguard-react
+  template:
+    metadata:
+      labels:
+        app: driveguard-react
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+      containers:
+        - name: react
+          image: mariusbayizere/driveguard-react:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: react-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# ─── Spring Boot Deployment ───────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveguard-springboot
+  namespace: prod
+  labels:
+    app: driveguard-springboot
+    project: driveguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driveguard-springboot
+  template:
+    metadata:
+      labels:
+        app: driveguard-springboot
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+      containers:
+        - name: springboot
+          image: mariusbayizere/driveguard-springboot:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: springboot-config
+            - secretRef:
+                name: springboot-secrets
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 150
+            periodSeconds: 20
+            failureThreshold: 10
+---
+# ─── Flask Deployment ─────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driveguard-flask
+  namespace: prod
+  labels:
+    app: driveguard-flask
+    project: driveguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driveguard-flask
+  template:
+    metadata:
+      labels:
+        app: driveguard-flask
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+      containers:
+        - name: flask
+          image: mariusbayizere/driveguard-flask:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: flask-config
+            - secretRef:
+                name: flask-secrets
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 10

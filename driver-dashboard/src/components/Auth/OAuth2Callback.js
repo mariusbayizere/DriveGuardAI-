@@ -29,7 +29,7 @@ export default function OAuth2Callback({ onAuthSuccess }) {
     }
 
     // Fetch user profile using the token
-    fetch("http://localhost:8080/api/v1/auth/me", {
+    fetch((process.env.REACT_APP_API_BASE || "https://driveguard.local/api/v1") + "/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

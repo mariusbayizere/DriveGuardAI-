@@ -1,4 +1,4 @@
-export const API_BASE       = "http://localhost:8080";
+export const API_BASE       = process.env.REACT_APP_API_BASE ? process.env.REACT_APP_API_BASE.replace("/api/v1","") : "https://driveguard.local";
 export const AUTH_ENDPOINTS = {
   signIn: `${API_BASE}/api/v1/auth/signin`,
   signUp: `${API_BASE}/api/v1/auth/signup`,

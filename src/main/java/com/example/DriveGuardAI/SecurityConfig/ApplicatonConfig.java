@@ -2,7 +2,6 @@ package com.example.DriveGuardAI.SecurityConfig;
 
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,19 +25,16 @@ public class ApplicatonConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // We use STATELESS for JWT but OAuth2 needs a minimal session
-            // just for the redirect flow — Spring handles this automatically
             .sessionManagement(management -> management
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
-                // Allow the OAuth2 login redirect URLs
                 .requestMatchers("/login/oauth2/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll() // ← FIX 1: allow liveness/readiness probes
                 .requestMatchers("/api/orders/**").hasAnyRole("MANAGER", "ADMIN")
                 .requestMatchers("/api/orders/history").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -46,26 +42,23 @@ public class ApplicatonConfig {
                 .requestMatchers("/api/products/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .anyRequest().permitAll())
-
-            // JWT filter for existing API authentication
             .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
-
-            // OAuth2 Login configuration
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(oAuth2SuccessHandler)
                 .failureUrl("http://localhost:3000/login?error=oauth_failed")
             )
-
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()));
-
         return http.build();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration ccfg = new CorsConfiguration();
-            ccfg.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
+            ccfg.setAllowedOriginPatterns(Arrays.asList( // ← FIX 2: add production domain
+                "http://localhost:3000",
+                "https://driveguard.duckdns.org"
+            ));
             ccfg.setAllowedMethods(Collections.singletonList("*"));
             ccfg.setAllowCredentials(true);
             ccfg.setAllowedHeaders(Collections.singletonList("*"));

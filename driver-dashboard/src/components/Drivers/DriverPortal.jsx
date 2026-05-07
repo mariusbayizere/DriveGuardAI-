@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 // ── Auth helpers ──────────────────────────────────────────────────────────
 const getToken = () => localStorage.getItem('dg_token');
 const getUser  = () => { try { return JSON.parse(localStorage.getItem('dg_user')); } catch { return null; } };
-const API_BASE   = 'http://localhost:8080/api/v1';
-const FLASK_BASE = 'http://localhost:5000';
+const API_BASE   = process.env.REACT_APP_API_BASE || 'https://driveguard.local/api/v1';
+const FLASK_BASE = process.env.REACT_APP_FLASK_BASE || 'https://driveguard.local/ai';
 
 const decodeJWT = (token) => {
   try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }

@@ -1,0 +1,165 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import AlertsManagement from '../AlertsManagement';
+import alertService from '../../../services/alertService';
+
+jest.mock('../../../services/alertService');
+
+const mockAlerts = [
+  { id: 1, message: 'Speed limit exceeded', sentAt: '2024-01-15T10:30:00', status: 'SENT',
+    user: { id: 1, firstName: 'Alice', lastName: 'Smith' }, incident: { incident_id: 10 } },
+  { id: 2, message: 'Hard braking detected', sentAt: '2024-01-16T14:00:00', status: 'READ',
+    user: { id: 2, firstName: 'Bob', lastName: 'Jones' }, incident: { incident_id: 11 } },
+];
+
+const mockUsers     = [{ id: 1, firstName: 'Alice', lastName: 'Smith' }];
+const mockIncidents = [{ incident_id: 10, incident_type: 'REAR_COLLISION' }];
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  alertService.getAllAlerts.mockResolvedValue({ data: mockAlerts });
+  alertService.getAllUsers.mockResolvedValue({ data: mockUsers });
+  alertService.getAllIncidents.mockResolvedValue({ data: mockIncidents });
+});
+
+describe('AlertsManagement – renders', () => {
+  it('renders the page title', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => expect(screen.getByText('Alerts Management')).toBeInTheDocument());
+  });
+
+  it('renders Add New Alert button', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => expect(screen.getByText('Add New Alert')).toBeInTheDocument());
+  });
+
+  it('renders search input', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText('Search by message, user...')).toBeInTheDocument()
+    );
+  });
+
+  it('renders status filter select', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => expect(screen.getByDisplayValue('All Status')).toBeInTheDocument());
+  });
+});
+
+describe('AlertsManagement – data loading', () => {
+  it('shows loading spinner initially', () => {
+    render(<AlertsManagement />);
+    expect(document.querySelector('.spinner')).toBeInTheDocument();
+  });
+
+  it('renders alert data after loading', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() =>
+      expect(screen.getAllByText('Speed limit exceeded').length).toBeGreaterThan(0)
+    );
+  });
+
+  it('shows error banner when fetch fails', async () => {
+    alertService.getAllAlerts.mockRejectedValue({ message: 'Server error' });
+    render(<AlertsManagement />);
+    await waitFor(() =>
+      expect(screen.getByText(/Failed to fetch alerts/i)).toBeInTheDocument()
+    );
+  });
+});
+
+describe('AlertsManagement – modal', () => {
+  it('opens Add New Alert modal on button click', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByText('Add New Alert'));
+    fireEvent.click(screen.getByText('Add New Alert'));
+    expect(screen.getByText('Create Alert')).toBeInTheDocument();
+  });
+
+  it('closes modal when Cancel is clicked', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByText('Add New Alert'));
+    fireEvent.click(screen.getByText('Add New Alert'));
+    fireEvent.click(screen.getByText('Cancel'));
+    await waitFor(() =>
+      expect(screen.queryByText('Create Alert')).not.toBeInTheDocument()
+    );
+  });
+
+  it('closes modal when backdrop is clicked', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByText('Add New Alert'));
+    fireEvent.click(screen.getByText('Add New Alert'));
+    const backdrop = document.querySelector('.fixed.inset-0');
+    fireEvent.click(backdrop);
+    await waitFor(() =>
+      expect(screen.queryByText('Create Alert')).not.toBeInTheDocument()
+    );
+  });
+});
+
+describe('AlertsManagement – delete flow', () => {
+  it('shows confirm dialog when delete button clicked (desktop)', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getAllByTitle('Delete'));
+    fireEvent.click(screen.getAllByTitle('Delete')[0]);
+    expect(screen.getByText('Delete Alert?')).toBeInTheDocument();
+  });
+
+  it('closes confirm dialog when Cancel is clicked', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getAllByTitle('Delete'));
+    fireEvent.click(screen.getAllByTitle('Delete')[0]);
+    fireEvent.click(screen.getByText('Cancel'));
+    await waitFor(() =>
+      expect(screen.queryByText('Delete Alert?')).not.toBeInTheDocument()
+    );
+  });
+
+  it('calls deleteAlert and shows success on confirm', async () => {
+    alertService.deleteAlert.mockResolvedValue({});
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getAllByTitle('Delete'));
+    fireEvent.click(screen.getAllByTitle('Delete')[0]);
+    fireEvent.click(screen.getByText('Delete Alert'));
+    await waitFor(() =>
+      expect(screen.getByText('Alert deleted successfully!')).toBeInTheDocument()
+    );
+    expect(alertService.deleteAlert).toHaveBeenCalledWith(mockAlerts[0].id);
+  });
+});
+
+describe('AlertsManagement – search and filter', () => {
+  it('filters alerts by search term', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByPlaceholderText('Search by message, user...'));
+    fireEvent.change(screen.getByPlaceholderText('Search by message, user...'), {
+      target: { value: 'Speed limit' }
+    });
+    await waitFor(() =>
+      expect(screen.queryByText('Hard braking detected')).not.toBeInTheDocument()
+    );
+  });
+
+  it('filters alerts by status', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByDisplayValue('All Status'));
+    fireEvent.change(screen.getByDisplayValue('All Status'), {
+      target: { value: 'READ' }
+    });
+    await waitFor(() =>
+      expect(screen.queryByText('Speed limit exceeded')).not.toBeInTheDocument()
+    );
+  });
+});
+
+describe('AlertsManagement – refresh', () => {
+  it('calls getAllAlerts again when refresh button is clicked', async () => {
+    render(<AlertsManagement />);
+    await waitFor(() => screen.getByTitle('Refresh'));
+    fireEvent.click(screen.getByTitle('Refresh'));
+    await waitFor(() =>
+      expect(alertService.getAllAlerts).toHaveBeenCalledTimes(2)
+    );
+  });
+});

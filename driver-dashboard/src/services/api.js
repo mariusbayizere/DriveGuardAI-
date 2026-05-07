@@ -1,8 +1,8 @@
 // api.js - API Service for communicating with Java backend
 import axios from 'axios';
 
-const JAVA_API_URL = 'http://localhost:8080/api/v1';
-const PYTHON_API_URL = 'http://localhost:5000/api';
+const JAVA_API_URL = process.env.REACT_APP_API_BASE || 'https://driveguard.local/api/v1';
+const PYTHON_API_URL = (process.env.REACT_APP_FLASK_BASE || 'https://driveguard.local/ai') + '/api';
 
 const javaApi = axios.create({
   baseURL: JAVA_API_URL,

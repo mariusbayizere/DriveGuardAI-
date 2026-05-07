@@ -1,0 +1,65 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: driveguard-ingress
+  namespace: prod
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - driveguard.duckdns.org
+      secretName: driveguard-duckdns-tls
+  rules:
+    - host: driveguard.duckdns.org
+      http:
+        paths:
+          # Spring Boot API
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: springboot-service
+                port:
+                  number: 8080
+          # Google OAuth2 authorization (Spring Boot handles this)
+          - path: /oauth2/authorization
+            pathType: Prefix
+            backend:
+              service:
+                name: springboot-service
+                port:
+                  number: 8080
+          # Spring Security login processing (Spring Boot handles this)
+          - path: /login/oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: springboot-service
+                port:
+                  number: 8080
+          # Flask AI service
+          - path: /ai
+            pathType: Prefix
+            backend:
+              service:
+                name: flask-service
+                port:
+                  number: 5000
+          # Everything else goes to React (including /oauth2/callback)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: react-service
+                port:
+                  number: 80

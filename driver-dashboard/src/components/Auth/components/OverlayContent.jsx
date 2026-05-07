@@ -13,7 +13,6 @@ export function OverlayContent({ isLogin, onSwitch, compact = false }) {
   return (
     <div className="relative z-10 flex flex-col items-center text-center">
       <GreenBg />
-
       <div style={{ marginBottom: compact ? 8 : 16 }}>
         <ShieldLogo />
       </div>
@@ -54,7 +53,7 @@ export function OverlayContent({ isLogin, onSwitch, compact = false }) {
 
       {!compact && <CarIllustration />}
 
-      {/* Feature pills */}
+      {/* Feature pills — FIXED: was [FEATURES.map](http://FEATURES.map) */}
       <div style={{
         marginTop: compact ? 0 : 12,
         display: "flex",

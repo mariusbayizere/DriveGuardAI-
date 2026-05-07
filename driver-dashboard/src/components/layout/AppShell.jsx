@@ -23,7 +23,8 @@ import DriversManagement   from '../Drivers/DriversManagement';
 import VehiclesManagement  from '../Vehicles/VehiclesManagement';
 import TripsManagement     from '../Trips/TripsManagement';
 import IncidentsManagement from '../Incidents/IncidentsManagement';
-import AlertsManagement    from '../Alerts/AlertsManagement';
+//import AlertsManagement    from '../Alerts/AlertsManagement';
+import AlertsManagement from '../Alerts/AlertsManagement';
 import IncidentReports     from '../Incidents/IncidentReports';
 import { NotFoundPage }    from '../Errors/ErrorPages';
 

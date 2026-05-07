@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const PYTHON_URL = 'http://localhost:5000';
+const PYTHON_URL = process.env.REACT_APP_FLASK_BASE || 'https://driveguard.local/ai';
 
 // ── Responsive hook ──
 const useResponsive = () => {
@@ -76,7 +76,7 @@ const MonitoringControl = () => {
       const vehicleName = vehicleObj ? (vehicleObj.model + ' (' + vehicleObj.plateNumber + ')') : '';
       const tripName    = tripObj    ? (tripObj.tripName || 'Trip #' + tripObj.tripId) : '';
 
-      const res = await fetch('http://localhost:5000/api/monitoring/start', {
+      const res = await fetch((process.env.REACT_APP_FLASK_BASE || 'https://driveguard.local/ai') + '/api/monitoring/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, TrendingUp, Clock, Filter, Download, FileText, RefreshCw } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8080/api/v1/reports';
+const API_BASE = (process.env.REACT_APP_API_BASE || 'https://driveguard.local/api/v1') + '/reports';
 
 // ── Responsive hook ──
 const useResponsive = () => {

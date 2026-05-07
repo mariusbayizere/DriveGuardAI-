@@ -1,26 +1,29 @@
-.env
-src/main/resources/application-local.properties
-src/main/resources/application-local.properties
-
-
-# Maven build directory - DO NOT COMMIT
+# Maven build output
 target/
+*.class
+*.jar
+*.war
 
-# Local configuration with passwords
+# Sensitive property files
 src/main/resources/application-local.properties
+src/main/resources/application-secret.properties
 
 # Environment files
 .env
-*.env
-!.env.example
 
-# IDE
+# IDE files
 .idea/
-*.iml
 .vscode/
-*.swp
-*.swo
+*.iml
+.classpath
+.project
+.settings/
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+logs/
+src/main/resources/application-local.properties

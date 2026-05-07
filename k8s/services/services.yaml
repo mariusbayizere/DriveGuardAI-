@@ -1,0 +1,56 @@
+# ─── React Service ────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-service
+  namespace: prod
+  labels:
+    app: driveguard-react
+    project: driveguard
+spec:
+  selector:
+    app: driveguard-react
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+# ─── Spring Boot Service ──────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service
+  namespace: prod
+  labels:
+    app: driveguard-springboot
+    project: driveguard
+spec:
+  selector:
+    app: driveguard-springboot
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+# ─── Flask Service ────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+  namespace: prod
+  labels:
+    app: driveguard-flask
+    project: driveguard
+spec:
+  selector:
+    app: driveguard-flask
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP

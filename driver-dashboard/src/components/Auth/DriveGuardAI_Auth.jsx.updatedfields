@@ -1,0 +1,207 @@
+import UpdatePassword      from "./UpdatePassword";
+import { useAuthForm }     from "./hooks/useAuthForm";
+import { SignInForm }      from "./forms/SignInForm";
+import { SignUpForm }      from "./forms/SignUpForm";
+import { OverlayContent } from "./components/OverlayContent";
+import { ShieldLogo }     from "./icons/ShieldLogo";
+import { LogoBox, GreenBg } from "./components/ui";
+import { FEATURES }       from "./constants/auth.constants";
+import { GREEN_GRADIENT, CARD_SHADOW, AUTH_CSS } from "./styles/auth.styles";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Panel header — reused across the three breakpoints
+───────────────────────────────────────────────────────────────────────── */
+function PanelHeader({ title, subtitle, large }) {
+  return (
+    <>
+      <LogoBox />
+      <div style={{
+        fontFamily: "'Outfit',sans-serif",
+        fontSize: large ? 26 : 22,
+        fontWeight: 800, color: "#0a1628", marginBottom: 4,
+      }}>
+        {title}
+      </div>
+      <div style={{ fontSize: large ? 13 : 12.5, color: "#6b7280", marginBottom: large ? 22 : 18 }}>
+        {subtitle}
+      </div>
+    </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Main page component — layout only, zero business logic
+───────────────────────────────────────────────────────────────────────── */
+export default function DriveGuardAuth({ onAuthSuccess }) {
+  const auth = useAuthForm({ onAuthSuccess });
+
+  if (auth.showUpdatePassword) {
+    return <UpdatePassword onBackToLogin={() => auth.setShowUpdatePassword(false)} />;
+  }
+
+  /* Shared form props passed down to both forms */
+  const signInProps = {
+    form:         auth.form,
+    fieldErrors:  auth.fieldErrors,
+    serverMsg:    auth.serverMsg,
+    loading:      auth.loading,
+    onHandle:     auth.handle,
+    onSubmit:     auth.submit,
+    onSwitchMode: () => auth.switchMode(false),
+    onForgotPass: () => auth.setShowUpdatePassword(true),
+  };
+
+  const signUpProps = {
+    form:          auth.form,
+    fieldErrors:   auth.fieldErrors,
+    serverMsg:     auth.serverMsg,
+    loading:       auth.loading,
+    onHandle:      auth.handle,
+    onHandlePhone: auth.handlePhone,
+    onSubmit:      auth.submit,
+    onSwitchMode:  () => auth.switchMode(true),
+  };
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-3 py-6 sm:px-4 sm:py-8 lg:py-6"
+      style={{
+        fontFamily: "'Outfit',sans-serif",
+        background: "radial-gradient(ellipse at 20% 50%,#e8f5f0 0%,#f0f9f5 60%,#ffffff 100%)",
+      }}
+    >
+      <style>{AUTH_CSS}</style>
+
+      {/* ══════════════════════════════════════════
+          MOBILE  (< 640px)
+      ══════════════════════════════════════════ */}
+      <div
+        className="sm:hidden w-full max-w-sm flex flex-col rounded-3xl overflow-hidden"
+        style={{ boxShadow: CARD_SHADOW }}
+      >
+        {/* Green header panel */}
+        <div style={{
+          background: GREEN_GRADIENT, position: "relative", overflow: "hidden",
+          padding: auth.isLogin ? "32px 24px 28px" : "16px 24px",
+        }}>
+          <GreenBg />
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <div style={{ marginBottom: auth.isLogin ? 10 : 6 }}><ShieldLogo /></div>
+            <div style={{
+              background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",
+              borderRadius: 50, padding: "4px 14px", fontSize: 10, fontWeight: 700,
+              color: "white", letterSpacing: 2.5, textTransform: "uppercase", marginBottom: 10,
+            }}>
+              DriveGuard AI
+            </div>
+
+            {auth.isLogin ? (
+              <>
+                <div style={{ fontFamily: "'Outfit',sans-serif", fontSize: 22, fontWeight: 800, color: "white", lineHeight: 1.25, marginBottom: 6 }}>
+                  Welcome Back!
+                </div>
+                <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", lineHeight: 1.6, marginBottom: 16, maxWidth: 260 }}>
+                  Sign in to monitor your fleet and drive with confidence
+                </div>
+                <div className="flex flex-wrap justify-center gap-2" style={{ marginBottom: 16 }}>
+                  {FEATURES.map((f) => (
+                    <div key={f} style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.09)", borderRadius: 50, padding: "5px 10px" }}>
+                      <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#a3e635", flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.88)", fontWeight: 600 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <button className="dg-ov-btn" onClick={() => auth.switchMode(false)}
+                  style={{ background: "transparent", border: "2px solid rgba(255,255,255,0.85)", color: "white", padding: "10px 36px", borderRadius: 50, fontSize: 13, fontWeight: 700, letterSpacing: 1, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>
+                  SIGN UP
+                </button>
+              </>
+            ) : (
+              <button className="dg-ov-btn" onClick={() => auth.switchMode(true)}
+                style={{ background: "transparent", border: "2px solid rgba(255,255,255,0.85)", color: "white", padding: "8px 28px", borderRadius: 50, fontSize: 12, fontWeight: 700, letterSpacing: 1, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>
+                ← SIGN IN
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* White form panel */}
+        <div className="flex flex-col items-center bg-white px-6 py-7">
+          {auth.isLogin ? (
+            <>
+              <PanelHeader title="Sign In" subtitle="Access your DriveGuard AI account" />
+              <SignInForm {...signInProps} idPrefix="si-mobile" />
+            </>
+          ) : (
+            <>
+              <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" />
+              <SignUpForm {...signUpProps} idPrefix="su-mobile" />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════
+          TABLET  (640px – 1023px)
+      ══════════════════════════════════════════ */}
+      <div
+        className="hidden sm:flex lg:hidden relative rounded-3xl overflow-hidden"
+        style={{ width: "100%", maxWidth: 720, minHeight: 520, boxShadow: CARD_SHADOW }}
+      >
+        {/* Sign In — left panel */}
+        <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 32px" }}>
+          <PanelHeader title="Welcome Back" subtitle="Sign in to your DriveGuard AI account" />
+          <SignInForm {...signInProps} idPrefix="si-tablet" />
+        </div>
+
+        {/* Green sliding overlay */}
+        <div className="dg-overlay-slide" style={{
+          position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+          background: GREEN_GRADIENT,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          padding: "32px 24px", zIndex: 20, overflow: "hidden",
+          transform: auth.isLogin ? "translateX(100%)" : "translateX(0)",
+        }}>
+          <OverlayContent isLogin={auth.isLogin} onSwitch={() => auth.switchMode(!auth.isLogin)} compact />
+        </div>
+
+        {/* Sign Up — right panel */}
+        <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 32px" }}>
+          <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" />
+          <SignUpForm {...signUpProps} idPrefix="su-tablet" />
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════
+          DESKTOP  (≥ 1024px)
+      ══════════════════════════════════════════ */}
+      <div
+        className="hidden lg:flex relative rounded-3xl overflow-hidden"
+        style={{ width: 880, minHeight: 600, boxShadow: CARD_SHADOW }}
+      >
+        {/* Sign In — left panel */}
+        <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 48px" }}>
+          <PanelHeader title="Welcome Back" subtitle="Sign in to your DriveGuard AI account" large />
+          <SignInForm {...signInProps} idPrefix="si-desktop" />
+        </div>
+
+        {/* Green sliding overlay */}
+        <div className="dg-overlay-slide" style={{
+          position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+          background: GREEN_GRADIENT,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          padding: "50px 40px", zIndex: 20, overflow: "hidden",
+          transform: auth.isLogin ? "translateX(100%)" : "translateX(0)",
+        }}>
+          <OverlayContent isLogin={auth.isLogin} onSwitch={() => auth.switchMode(!auth.isLogin)} />
+        </div>
+
+        {/* Sign Up — right panel */}
+        <div style={{ flex: "0 0 50%", background: "#ffffff", overflowY: "auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 48px" }}>
+          <PanelHeader title="Create Account" subtitle="Join DriveGuard AI — drive smarter & safer" large />
+          <SignUpForm {...signUpProps} idPrefix="su-desktop" />
+        </div>
+      </div>
+    </div>
+  );
+}
