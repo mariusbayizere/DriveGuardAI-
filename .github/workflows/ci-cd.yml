@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  REGISTRY: docker.io
-
 jobs:
   # ─── Job 1: Test Spring Boot ───────────────────────────────────────────
   test-springboot:
@@ -55,7 +51,7 @@ jobs:
       - name: Run React tests
         run: npm test -- --watchAll=false --passWithNoTests
 
-  # ─── Job 3: Build & Push Spring Boot Docker image ────────────────────
+  # ─── Job 3: Build & Push Spring Boot ─────────────────────────────────
   build-push-springboot:
     name: Build & Push Spring Boot
     runs-on: ubuntu-latest
@@ -91,7 +87,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─── Job 4: Build & Push React Docker image ───────────────────────────
+  # ─── Job 4: Build & Push React ────────────────────────────────────────
   build-push-react:
     name: Build & Push React
     runs-on: ubuntu-latest
@@ -130,49 +126,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─── Job 5: Deploy to Kubernetes ──────────────────────────────────────
-  deploy:
-    name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
-    needs: [build-push-springboot, build-push-react]
-    if: false # Enable when cluster is publicly accessible
-    if: false # Enable when cluster is publicly accessible
-    if: false # Enable when cluster is publicly accessible
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get short SHA
-        id: sha
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.29.0'
-
-      - name: Configure kubectl
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Update Spring Boot image
-        run: |
-          kubectl set image deployment/driveguard-springboot \
-            springboot=${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:${{ steps.sha.outputs.SHORT_SHA }} \
-            -n prod
-          kubectl rollout status deployment/driveguard-springboot -n prod --timeout=300s
-
-      - name: Update React image
-        run: |
-          kubectl set image deployment/driveguard-react \
-            react=${{ secrets.DOCKER_USERNAME }}/driveguard-react:${{ steps.sha.outputs.SHORT_SHA }} \
-            -n prod
-          kubectl rollout status deployment/driveguard-react -n prod --timeout=120s
-
-      - name: Verify deployment
-        run: |
-          kubectl get pods -n prod
-          echo "✅ Deployment successful!"
+  # ─── Job 5: Deploy (disabled until Oracle Cloud) ──────────────────────
+  # Uncomment when you have a public Kubernetes cluster
+  # deploy:
+  #   name: Deploy to Kubernetes
+  #   runs-on: ubuntu-latest
+  #   needs: [build-push-springboot, build-push-react]
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: azure/setup-kubectl@v3
+  #       with:
+  #         version: 'v1.29.0'
+  #     - run: |
+  #         mkdir -p ~/.kube
+  #         echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+  #     - run: |
+  #         kubectl set image deployment/driveguard-springboot springboot=${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:$(git rev-parse --short HEAD) -n prod
+  #         kubectl set image deployment/driveguard-react react=${{ secrets.DOCKER_USERNAME }}/driveguard-react:$(git rev-parse --short HEAD) -n prod
