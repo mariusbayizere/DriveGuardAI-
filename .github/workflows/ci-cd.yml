@@ -1,0 +1,178 @@
+name: DriveGuardAI CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  REGISTRY: docker.io
+
+jobs:
+  # ─── Job 1: Test Spring Boot ───────────────────────────────────────────
+  test-springboot:
+    name: Test Spring Boot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Spring Boot tests
+        run: mvn test -B
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+  # ─── Job 2: Test React ────────────────────────────────────────────────
+  test-react:
+    name: Test React
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: driver-dashboard
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: driver-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run React tests
+        run: npm test -- --watchAll=false --passWithNoTests
+
+  # ─── Job 3: Build & Push Spring Boot Docker image ────────────────────
+  build-push-springboot:
+    name: Build & Push Spring Boot
+    runs-on: ubuntu-latest
+    needs: [test-springboot]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get short SHA
+        id: sha
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push Spring Boot image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:latest
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:v1.0.${{ github.run_number }}
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:${{ steps.sha.outputs.SHORT_SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Job 4: Build & Push React Docker image ───────────────────────────
+  build-push-react:
+    name: Build & Push React
+    runs-on: ubuntu-latest
+    needs: [test-react]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get short SHA
+        id: sha
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push React image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./driver-dashboard
+          file: ./driver-dashboard/Dockerfile
+          push: true
+          build-args: |
+            REACT_APP_API_BASE=https://driveguard.duckdns.org/api/v1
+            REACT_APP_FLASK_BASE=https://driveguard.duckdns.org/ai
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-react:latest
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-react:v1.0.${{ github.run_number }}
+            ${{ secrets.DOCKER_USERNAME }}/driveguard-react:${{ steps.sha.outputs.SHORT_SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Job 5: Deploy to Kubernetes ──────────────────────────────────────
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: [build-push-springboot, build-push-react]
+    if: false # Enable when cluster is publicly accessible
+    if: false # Enable when cluster is publicly accessible
+    if: false # Enable when cluster is publicly accessible
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: sha
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.29.0'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Update Spring Boot image
+        run: |
+          kubectl set image deployment/driveguard-springboot \
+            springboot=${{ secrets.DOCKER_USERNAME }}/driveguard-springboot:${{ steps.sha.outputs.SHORT_SHA }} \
+            -n prod
+          kubectl rollout status deployment/driveguard-springboot -n prod --timeout=300s
+
+      - name: Update React image
+        run: |
+          kubectl set image deployment/driveguard-react \
+            react=${{ secrets.DOCKER_USERNAME }}/driveguard-react:${{ steps.sha.outputs.SHORT_SHA }} \
+            -n prod
+          kubectl rollout status deployment/driveguard-react -n prod --timeout=120s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n prod
+          echo "✅ Deployment successful!"
